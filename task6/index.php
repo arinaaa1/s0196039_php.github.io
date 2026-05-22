@@ -1,0 +1,118 @@
+<?php
+session_start();
+require_once __DIR__ . '/jwt.php';
+require_once __DIR__ . '/config.php';
+
+$payload = getJWTFromCookie();
+$isLoggedIn = ($payload !== null);
+$login = $isLoggedIn ? htmlspecialchars($payload['login']) : '';
+?>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Анкета — Главная</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: linear-gradient(145deg, #ffe4ec 0%, #ffd6e2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(236, 72, 153, 0.12), 0 0 0 1px rgba(255, 245, 245, 0.7) inset;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            animation: fadeSlideUp 0.45s ease-out;
+        }
+        .logo { font-size: 4rem; margin-bottom: 1rem; }
+        h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, #c4456c, #b8315a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle { font-size: 0.9rem; color: #b35f7c; margin-bottom: 2rem; }
+        .user-greeting {
+            background: rgba(224, 124, 158, 0.1);
+            border: 1px solid rgba(224, 124, 158, 0.3);
+            border-radius: 1.5rem;
+            padding: 0.7rem;
+            color: #b34e72;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 0.8rem;
+        }
+        .btn-primary {
+            background: linear-gradient(95deg, #e47297, #d95580);
+            color: white;
+        }
+        .btn-primary:hover { transform: scale(0.98); }
+        .btn-secondary {
+            background: rgba(217, 85, 128, 0.1);
+            color: #c4456c;
+            border: 1px solid rgba(217, 85, 128, 0.3);
+        }
+        .btn-danger {
+            background: rgba(229, 62, 62, 0.1);
+            color: #d94a73;
+            border: 1px solid rgba(217, 85, 128, 0.3);
+        }
+        .btn-admin {
+            background: rgba(217, 85, 128, 0.05);
+            color: #b34e72;
+            border: 1px solid rgba(217, 85, 128, 0.2);
+            font-size: 0.85rem;
+        }
+        .divider {
+            height: 1px;
+            background: rgba(217, 85, 128, 0.2);
+            margin: 0.5rem 0 1.2rem;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <span class="logo">📋</span>
+    <h1>Система анкетирования</h1>
+    <p class="subtitle">Заполните анкету или войдите чтобы изменить данные</p>
+
+    <?php if ($isLoggedIn): ?>
+        <div class="user-greeting">Вы вошли как <strong><?= $login ?></strong></div>
+        <a href="edit.php" class="btn btn-primary">✏️ Редактировать анкету</a>
+        <div class="divider"></div>
+        <a href="logout.php" class="btn btn-danger">Выйти</a>
+    <?php else: ?>
+        <a href="form.php" class="btn btn-primary">📝 Заполнить анкету</a>
+        <a href="login.php" class="btn btn-secondary">🔐 Войти</a>
+        <div class="divider"></div>
+        <a href="admin.php" class="btn btn-admin">🛠 Войти как администратор</a>
+    <?php endif; ?>
+</div>
+</body>
+</html>
