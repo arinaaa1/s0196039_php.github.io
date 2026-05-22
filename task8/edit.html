@@ -206,7 +206,7 @@
   </div>
 
   <script>
-    const API = 's0196039_php.github.io/task8/api.php';
+    const API = '/s0196039_php.github.io/task8/api.php';
 
 
     // Проверяем авторизацию
@@ -240,7 +240,7 @@
 // Загружаем текущие данные
 async function loadProfile() {
     try {
-        const response = await fetch('/web_backend/task8/api.cgi?action=profile', {
+        const response = await fetch('/s0196039_php.github.io/task8/api.php?action=profile', {
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token

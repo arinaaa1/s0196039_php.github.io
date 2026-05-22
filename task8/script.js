@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   
-  const FORM_ENDPOINT = "s0196039_php.github.io/task8/api.php";
+  const FORM_ENDPOINT = "/s0196039_php.github.io/task8/api.php";
   const STORAGE_KEY = "drupalFormData:v1";
   
   if (window.innerWidth <= 992) {
