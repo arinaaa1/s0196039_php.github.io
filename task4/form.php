@@ -2,7 +2,7 @@
 session_start();
 require_once __DIR__ . '/db.php';
 
-// ---------- Вспомогательные функции для работы с cookie ----------
+// ---------- Cookie helpers ----------
 function setSessionCookie($name, $value) {
     setcookie($name, $value, [
         'expires' => 0,
@@ -83,7 +83,7 @@ function loadFromCookies() {
     return $data;
 }
 
-// ---------- Данные для выпадающего списка языков ----------
+// ---------- Languages list ----------
 $ALL_LANGUAGES = [
     ['id' => '1', 'name' => 'Pascal'], ['id' => '2', 'name' => 'C'],
     ['id' => '3', 'name' => 'C++'], ['id' => '4', 'name' => 'JavaScript'],
@@ -93,14 +93,14 @@ $ALL_LANGUAGES = [
     ['id' => '11', 'name' => 'Scala'], ['id' => '12', 'name' => 'Go'],
 ];
 
-// ---------- Функция валидации (аналог validate.go) ----------
-// Эмуляция mb_strlen, если расширение не установлено
+// ---------- mb_strlen fallback ----------
 if (!function_exists('mb_strlen')) {
     function mb_strlen($str, $encoding = 'UTF-8') {
         return preg_match_all('/./us', $str, $matches);
     }
 }
 
+// ---------- Validation ----------
 function validateFormData($post) {
     $data = [
         'name' => '', 'phone' => '', 'email' => '', 'birthdate' => '',
@@ -209,7 +209,7 @@ function validateFormData($post) {
     return [$data, $errors];
 }
 
-// ---------- Сохранение в БД (аналог db.go) ----------
+// ---------- Database save ----------
 function saveToDatabase($pdo, $data) {
     try {
         $pdo->beginTransaction();
@@ -242,13 +242,12 @@ function saveToDatabase($pdo, $data) {
     }
 }
 
-// ---------- Рендеринг формы (встроенный шаблон из template.go) ----------
+// ---------- Render form ----------
 function renderForm($pageData, $languages) {
     $values = $pageData['values'];
     $errors = $pageData['errors'];
     $success = $pageData['success'];
 
-    // Функция для проверки выбранного языка (аналог IsSelectedLang)
     $isSelectedLang = function($id) use ($values) {
         return in_array($id, $values['languages'] ?? []);
     };
@@ -499,7 +498,7 @@ function renderForm($pageData, $languages) {
             <label>Любимый язык программирования</label>
             <select name="languages[]" multiple>
                 <?php foreach ($languages as $lang): ?>
-                <option value="<?= htmlspecialchars($lang['id']) ?>" <?= $isSelectedLang($lang['id']) ? 'selected' : ?>><?= htmlspecialchars($lang['name']) ?></option>
+                <option value="<?= htmlspecialchars($lang['id']) ?>" <?= $isSelectedLang($lang['id']) ? 'selected' : '' ?>><?= htmlspecialchars($lang['name']) ?></option>
                 <?php endforeach; ?>
             </select>
             <?php if (isset($errors['languages'])): ?>
@@ -532,43 +531,35 @@ function renderForm($pageData, $languages) {
 <?php
 }
 
-// ---------- Основная логика (handler) ----------
+// ---------- Main handler ----------
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    // GET: загружаем данные из cookies и показываем форму
     $pageData = loadFromCookies();
     renderForm($pageData, $ALL_LANGUAGES);
     exit;
 }
 
 if ($method === 'POST') {
-    // POST: валидация, сохранение, установка cookies, редирект
     list($formData, $errors) = validateFormData($_POST);
 
     if (!empty($errors)) {
-        // Ошибки: сохраняем ошибки и отправленные значения в cookies, редирект на GET
         saveErrorsToCookie($errors, $formData);
         header('Location: form.php');
         exit;
     }
 
-    // Нет ошибок: сохраняем в БД
     $saved = saveToDatabase($pdo, $formData);
     if (!$saved) {
-        // Ошибка БД – показываем 500
         http_response_code(500);
         echo 'Internal server error. Try again later';
         exit;
     }
 
-    // Успех: сохраняем данные в persistent cookie, success cookie и редирект
     saveSuccessToCookie($formData);
     header('Location: form.php');
     exit;
 }
 
-// Любой другой метод – 405
 http_response_code(405);
 echo 'Method is not allowed';
-?>
